@@ -23,8 +23,8 @@ The Financial Portfolio Management System is a comprehensive web-based applicati
 
 1. **Clone the repository**
    ```bash
-   git clone https://bitbucket.org/vaibhav310720/financialportfoliomanager.git
-   cd financialportfoliomanager
+   git clone https://github.com/vaibhav-kadam3107/NIVESH-2.0.git
+   cd NIVESH-2.0
    ```
 
 2. **Install dependencies**
@@ -33,12 +33,8 @@ The Financial Portfolio Management System is a comprehensive web-based applicati
    ```
 
 3. **Database Setup**
-   - Create a MySQL database named `fpdb`
-   - Update database credentials in `src/backend/config/config.env`
-   - Run the database initialization script:
-   ```bash
-   node scripts/database/init_db.js
-   ```
+   - Create a MySQL database named `portfolio_db`
+   - Create and Update database credentials in `src/backend/config/config.env`
 
 4. **Start the application**
    ```bash
@@ -66,7 +62,7 @@ PORT=3000
 DB_HOST=localhost
 DB_USER=your_username
 DB_PASSWORD=your_password
-DB_NAME=fpdb
+DB_NAME=portfolio_db
 
 # Environment
 NODE_ENV=development
@@ -76,7 +72,7 @@ NODE_ENV=development
 - **Host**: MySQL server hostname (default: localhost)
 - **User**: MySQL username (default: root)
 - **Password**: MySQL password
-- **Database**: Database name (default: fpdb)
+- **Database**: Database name (default: portfolio_db)
 
 ## Environment Configuration
 
@@ -460,8 +456,6 @@ npm test -- tests/unit/api.test.js
 - [ ] Documentation is updated
 - [ ] No security vulnerabilities
 - [ ] Performance considerations addressed
-
-## Acknowledgments
 
 ### Libraries and Frameworks
 - **Express.js**: Web application framework
