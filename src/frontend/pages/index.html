@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nivesh - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Toastr.js for notifications -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        // Configure Toastr.js for dark theme
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "4000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark-950 text-white min-h-screen">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 w-64 bg-dark-900 border-r border-dark-700">
+        <div class="flex items-center justify-center h-16 border-b border-dark-700">
+            <h1 class="text-xl font-bold text-white">📈 Nivesh</h1>
+        </div>
+        
+        <nav class="mt-8">
+            <div class="px-4 space-y-2">
+                <a href="index.html" class="flex items-center px-4 py-3 text-white bg-red-600 rounded-lg">
+                    <i data-feather="home" class="w-5 h-5 mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="holdings.html" class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg">
+                    <i data-feather="briefcase" class="w-5 h-5 mr-3"></i>
+                    Holdings
+                </a>
+                <a href="markets.html" class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg">
+                    <i data-feather="trending-up" class="w-5 h-5 mr-3"></i>
+                    Markets
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg">
+                    <i data-feather="settings" class="w-5 h-5 mr-3"></i>
+                    Settings <span class="text-xs text-gray-500 ml-2">(soon)</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg">
+                    <i data-feather="help-circle" class="w-5 h-5 mr-3"></i>
+                    Help <span class="text-xs text-gray-500 ml-2">(soon)</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 p-8">
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Dashboard</h1>
+                <p class="text-2xl font-semibold text-white mb-1">Good morning, Investor!</p>
+                <p class="text-gray-400">Here's your portfolio overview for today</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-400">Last updated: <span id="lastUpdated">12:04:09</span></span>
+                <button onclick="printReport()" class="flex items-center px-4 py-2 bg-dark-800 text-white rounded-lg hover:bg-dark-700">
+                    <i data-feather="printer" class="w-4 h-4 mr-2"></i>
+                    Print Report
+                </button>
+                <button onclick="openNewInvestmentModal()" class="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    <i data-feather="plus" class="w-4 h-4 mr-2"></i>
+                    New Investment
+                </button>
+            </div>
+        </div>
+
+        <!-- Overview Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-dark-800 rounded-lg p-6">
+                <h3 class="text-gray-400 text-sm mb-2">Total Portfolio Value</h3>
+                <p class="text-2xl font-bold text-white" id="totalValue">₹0</p>
+                <p class="text-green-500 text-sm" id="totalValueChange">+₹0 (+0.00%)</p>
+            </div>
+            
+            <div class="bg-dark-800 rounded-lg p-6">
+                <h3 class="text-gray-400 text-sm mb-2">Cash Holdings</h3>
+                <p class="text-2xl font-bold text-white" id="cashHoldings">₹0</p>
+                <p class="text-gray-400 text-sm">Available for investment</p>
+            </div>
+            
+            <div class="bg-dark-800 rounded-lg p-6">
+                <h3 class="text-gray-400 text-sm mb-2">Day's Gain/Loss</h3>
+                <p class="text-2xl font-bold text-white" id="dayGainLoss">₹0</p>
+                <p class="text-green-500 text-sm" id="dayGainLossPercent">+0.00%</p>
+            </div>
+            
+            <div class="bg-dark-800 rounded-lg p-6">
+                <h3 class="text-gray-400 text-sm mb-2">Total Gain/Loss</h3>
+                <p class="text-2xl font-bold text-white" id="totalGainLoss">₹0</p>
+                <p class="text-green-500 text-sm" id="totalGainLossPercent">+0.00%</p>
+            </div>
+        </div>
+
+        <!-- Portfolio Performance Chart -->
+        <div class="bg-dark-800 rounded-lg p-6 mb-8">
+            <h3 class="text-lg font-semibold text-white mb-4">Portfolio Performance</h3>
+            <div class="h-64">
+                <canvas id="performanceChart"></canvas>
+            </div>
+            <div class="mt-4">
+                <p class="text-2xl font-bold text-white" id="portfolioValue">₹0</p>
+                <p class="text-green-500" id="portfolioChange">+₹0 (0.00%)</p>
+            </div>
+        </div>
+
+        <!-- Asset Allocation & Investment Distribution -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Asset Allocation -->
+            <div class="bg-dark-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Asset Allocation</h3>
+                <div class="h-64">
+                    <canvas id="allocationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Investment Distribution Chart -->
+            <div class="bg-dark-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-white mb-2">Investment Distribution</h3>
+                <p class="text-gray-400 text-sm mb-4">Bar Chart - Investment Distribution</p>
+                <div class="h-64">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="flex space-x-4 mb-8">
+            <button onclick="window.location.href='holdings.html'" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                View Full Portfolio
+            </button>
+            <button onclick="openBuyModal()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+                <i data-feather="trending-up" class="w-4 h-4 mr-2 inline"></i>
+                Quick Buy
+            </button>
+            <button onclick="openSellModal()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                <i data-feather="trending-down" class="w-4 h-4 mr-2 inline"></i>
+                Quick Sell
+            </button>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-dark-800 rounded-lg p-6 mb-8">
+            <h3 class="text-lg font-semibold text-white mb-4">Recent Activity</h3>
+            <div class="space-y-4" id="recentActivityList">
+                <!-- Dynamic content loaded via JavaScript -->
+                <div class="text-center text-gray-400 py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400 mx-auto mb-2"></div>
+                    Loading recent transactions...
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Buy Stock Modal -->
+    <div id="buyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-dark-800 rounded-lg p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-white">Buy Stock</h2>
+                    <button onclick="closeBuyModal()" class="text-gray-400 hover:text-white">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <form id="buyForm" onsubmit="executeBuyOrder(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Stock Ticker</label>
+                        <select id="buyTicker" class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                            <option value="">Select a stock...</option>
+                        </select>
+                        <div id="buyStockInfo" class="mt-2 text-sm text-gray-400"></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Quantity</label>
+                        <input type="number" id="buyQuantity" min="1" class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Number of shares" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Price per Share (₹)</label>
+                        <input type="number" id="buyPrice" step="0.01" min="0.01" class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Price per share" required>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex justify-between text-sm text-gray-300">
+                            <span>Total Amount:</span>
+                            <span id="buyTotal">₹0.00</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button type="button" onclick="closeBuyModal()" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cancel</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Buy Stock</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sell Stock Modal -->
+    <div id="sellModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-dark-800 rounded-lg p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-white">Sell Stock</h2>
+                    <button onclick="closeSellModal()" class="text-gray-400 hover:text-white">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <form id="sellForm" onsubmit="executeSellOrder(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Stock Ticker</label>
+                        <select id="sellTicker" class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                            <option value="">Select a stock...</option>
+                        </select>
+                        <div id="sellStockInfo" class="mt-2 text-sm text-gray-400"></div>
+                        <div id="sellHoldings" class="mt-2 text-sm text-gray-400"></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Quantity</label>
+                        <input type="number" id="sellQuantity" min="1" class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Number of shares" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Price per Share (₹)</label>
+                        <input type="number" id="sellPrice" step="0.01" min="0.01" class="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Price per share" required>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex justify-between text-sm text-gray-300">
+                            <span>Total Amount:</span>
+                            <span id="sellTotal">₹0.00</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button type="button" onclick="closeSellModal()" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Cancel</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Sell Stock</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Investment Modal -->
+    <div id="newInvestmentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-dark-800 rounded-lg p-6 w-full max-w-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-white">New Investment</h2>
+                    <button onclick="closeNewInvestmentModal()" class="text-gray-400 hover:text-white">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <button onclick="openBuyModal(); closeNewInvestmentModal();" class="w-full p-4 bg-green-600 hover:bg-green-700 rounded-lg text-left transition-colors">
+                        <div class="flex items-center">
+                            <i data-feather="trending-up" class="w-6 h-6 mr-3"></i>
+                            <div>
+                                <h3 class="font-semibold text-white">Buy Stocks</h3>
+                                <p class="text-sm text-gray-300">Purchase individual stocks from the market</p>
+                            </div>
+                        </div>
+                    </button>
+                    <button onclick="window.location.href='markets.html'" class="w-full p-4 bg-blue-600 hover:bg-blue-700 rounded-lg text-left transition-colors">
+                        <div class="flex items-center">
+                            <i data-feather="pie-chart" class="w-6 h-6 mr-3"></i>
+                            <div>
+                                <h3 class="font-semibold text-white">Browse Markets</h3>
+                                <p class="text-sm text-gray-300">Explore available stocks and ETFs</p>
+                            </div>
+                        </div>
+                    </button>
+                    <button onclick="addToWatchlist()" class="w-full p-4 bg-purple-600 hover:bg-purple-700 rounded-lg text-left transition-colors">
+                        <div class="flex items-center">
+                            <i data-feather="eye" class="w-6 h-6 mr-3"></i>
+                            <div>
+                                <h3 class="font-semibold text-white">Add to Watchlist</h3>
+                                <p class="text-sm text-gray-300">Monitor stocks without buying</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-dark-800 rounded-lg p-6">
+                <div class="flex items-center space-x-3">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+                    <span class="text-white">Processing transaction...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html> 
